@@ -30,7 +30,9 @@ namespace MvcAdoDemo
                 .AddDbContext<CrudApiContext>(
                     opt => opt.UseNpgsql(Configuration.GetConnectionString("CrudApiConnection"))
                 );
+
             services.AddTransient<ICrudRepository, CrudRepository>();
+            
             services.AddMvc();
         }
 

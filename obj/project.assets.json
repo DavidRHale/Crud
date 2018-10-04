@@ -13628,11 +13628,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\MvcAdoDemo.csproj",
+      "projectUniqueName": "C:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\MvcAdoDemo.csproj",
       "projectName": "MvcAdoDemo",
-      "projectPath": "c:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\MvcAdoDemo.csproj",
+      "projectPath": "C:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\MvcAdoDemo.csproj",
       "packagesPath": "C:\\Users\\DavidH\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\obj\\",
+      "outputPath": "C:\\Users\\DavidH\\devplay\\netcore\\RandomCrud\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
