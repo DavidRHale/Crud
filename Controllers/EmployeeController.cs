@@ -1,111 +1,123 @@
-// using System;
-// using System.Collections.Generic;
-// using System.Diagnostics;
-// using System.Linq;
-// using System.Threading.Tasks;
-// using Microsoft.AspNetCore.Mvc;
-// using MVCAdoDemo.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using MVCAdoDemo.Models;
 
-// namespace MVCAdoDemo.Controllers
-// {
-//     public class EmployeeController : Controller
-//     {
-//         public IActionResult Index()
-//         {
-//             List<Employee> lstEmployee = new List<Employee>();
-//             // lstEmployee = objemployee.GetAllEmployees().ToList();
+namespace MVCAdoDemo.Controllers
+{
+    public class EmployeeController : Controller
+    {
+        ICrudRepository _repo;
 
-//             return View(lstEmployee);
-//         }
+        public EmployeeController(ICrudRepository repository)
+        {
+            _repo = repository;
+        }
 
-//         [HttpGet]
-//         public IActionResult Create()
-//         {
-//             return View();
-//         }
+        public IActionResult Index()
+        {
+            var lstEmployee = _repo.GetAllEmployees();
 
-//         [HttpPost]
-//         [ValidateAntiForgeryToken]
-//         public IActionResult Create([Bind] Employee employee)
-//         {
-//             if (ModelState.IsValid)
-//             {
-//                 // objemployee.AddEmployee(employee);
-//                 return RedirectToAction("Index");
-//             }
-//             return View(employee);
-//         }
+            return View(lstEmployee);
+        }
 
-//         [HttpGet]
-//         public IActionResult Edit(int? id)
-//         {
-//             if (id == null)
-//             {
-//                 return NotFound();
-//             }
-//             // Employee employee = objemployee.GetEmployeeData(id);
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-//             if (employee == null)
-//             {
-//                 return NotFound();
-//             }
-//             return View(employee);
-//         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create([Bind] Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                _repo.AddEntity(employee);
+                _repo.SaveAllAsync();
 
-//         [HttpPost]
-//         [ValidateAntiForgeryToken]
-//         public IActionResult Edit(int id, [Bind]Employee employee)
-//         {
-//             if (id != employee.Id)
-//             {
-//                 return NotFound();
-//             }
-//             if (ModelState.IsValid)
-//             {
-//                 // objemployee.UpdateEmployee(employee);
-//                 return RedirectToAction("Index");
-//             }
-//             return View(employee);
-//         }
+                return RedirectToAction("Index");
+            }
+            return View(employee);
+        }
 
-//         [HttpGet]
-//         public IActionResult Details(int? id)
-//         {
-//             if (id == null)
-//             {
-//                 return NotFound();
-//             }
-//             // Employee employee = objemployee.GetEmployeeData(id);
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var employee = _repo.GetEmployeeById(id.Value);
 
-//             if (employee == null)
-//             {
-//                 return NotFound();
-//             }
-//             return View(employee);
-//         }
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
 
-//         [HttpGet]
-//         public IActionResult Delete(int? id)
-//         {
-//             if (id == null)
-//             {
-//                 return NotFound();
-//             }
-//             // Employee employee = objemployee.GetEmployeeData(id);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, [Bind]Employee employee)
+        {
+            if (id != employee.Id)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                var storedEmployee = _repo.GetEmployeeById(id);
+                storedEmployee = employee;
+                _repo.SaveAllAsync();
 
-//             if (employee == null)
-//             {
-//                 return NotFound();
-//             }
-//             return View(employee);
-//         }
+                return RedirectToAction("Index");
+            }
+            return View(employee);
+        }
 
-//         [HttpPost, ActionName("Delete")]
-//         [ValidateAntiForgeryToken]
-//         public IActionResult DeleteConfirmed(int? id)
-//         {
-//             // objemployee.DeleteEmployee(id);
-//             return RedirectToAction("Index");
-//         }
-//     }
-// }
+        [HttpGet]
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var employee = _repo.GetEmployeeById(id.Value);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var employee = _repo.GetEmployeeById(id.Value);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int? id)
+        {
+            var storedEmployee = _repo.GetEmployeeById(id.Value);
+            _repo.Delete(storedEmployee);
+            return RedirectToAction("Index");
+        }
+    }
+}
