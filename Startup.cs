@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Marten;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -25,13 +26,17 @@ namespace MvcAdoDemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddEntityFrameworkNpgsql()
-                .AddDbContext<CrudApiContext>(
-                    opt => opt.UseNpgsql(Configuration.GetConnectionString("CrudApiConnection"))
-                );
+            // services
+            //     .AddEntityFrameworkNpgsql()
+            //     .AddDbContext<CrudApiContext>(
+            //         opt => opt.UseNpgsql(Configuration.GetConnectionString("CrudApiConnection"))
+            //     );
 
-            services.AddTransient<ICrudRepository, CrudRepository>();
+            // services.AddTransient<ICrudRepository, CrudRepository>();
+
+            services.AddScoped<IDocumentStore>(provider => 
+                DocumentStore.For("Server=127.0.0.1;Port=5432;Database=crudmarten;User Id=CrudAdmin;Password=WhatsInTheBox7;")
+            );
             
             services.AddMvc();
         }

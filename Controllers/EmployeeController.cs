@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Marten;
 using Microsoft.AspNetCore.Mvc;
 using MVCAdoDemo.Models;
 
@@ -10,16 +11,23 @@ namespace MVCAdoDemo.Controllers
 {
     public class EmployeeController : Controller
     {
-        ICrudRepository _repo;
+        IDocumentStore _store;
 
-        public EmployeeController(ICrudRepository repository)
+        public EmployeeController(IDocumentStore documentStore)
         {
-            _repo = repository;
+            _store = documentStore;
         }
 
         public IActionResult Index()
         {
-            var lstEmployee = _repo.GetAllEmployees();
+            IEnumerable<Employee> lstEmployee;
+
+            using (var session = _store.QuerySession())
+            {
+                lstEmployee = session.Query<Employee>();
+            }
+
+            // Check not empty, catch exceptions            
 
             return View(lstEmployee);
         }
@@ -32,12 +40,15 @@ namespace MVCAdoDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind] Employee employee)
+        public async Task<IActionResult> Create([Bind] Employee employee)
         {
             if (ModelState.IsValid)
             {
-                _repo.AddEntity(employee);
-                _repo.SaveAllAsync();
+                using (var session = _store.LightweightSession())
+                {
+                    session.Insert(employee);
+                    session.SaveChanges();
+                }
 
                 return RedirectToAction("Index");
             }
@@ -51,18 +62,24 @@ namespace MVCAdoDemo.Controllers
             {
                 return NotFound();
             }
-            var employee = _repo.GetEmployeeById(id.Value);
+
+            Employee employee;
+            using (var session = _store.QuerySession())
+            {
+                employee = session.Load<Employee>(id.Value);
+            }
 
             if (employee == null)
             {
                 return NotFound();
             }
+            
             return View(employee);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind]Employee employee)
+        public async Task<IActionResult> Edit(int id, [Bind]Employee employee)
         {
             if (id != employee.Id)
             {
@@ -70,9 +87,11 @@ namespace MVCAdoDemo.Controllers
             }
             if (ModelState.IsValid)
             {
-                var storedEmployee = _repo.GetEmployeeById(id);
-                storedEmployee = employee;
-                _repo.SaveAllAsync();
+                using (var session = _store.LightweightSession())
+                {
+                    session.Update(employee);
+                    session.SaveChanges();
+                }
 
                 return RedirectToAction("Index");
             }
@@ -86,7 +105,12 @@ namespace MVCAdoDemo.Controllers
             {
                 return NotFound();
             }
-            var employee = _repo.GetEmployeeById(id.Value);
+
+            Employee employee;
+            using (var session = _store.QuerySession())
+            {
+                employee = session.Load<Employee>(id.Value);
+            }
 
             if (employee == null)
             {
@@ -102,7 +126,12 @@ namespace MVCAdoDemo.Controllers
             {
                 return NotFound();
             }
-            var employee = _repo.GetEmployeeById(id.Value);
+            
+            Employee employee;
+            using (var session = _store.QuerySession())
+            {
+                employee = session.Load<Employee>(id.Value);
+            }
 
             if (employee == null)
             {
@@ -115,8 +144,12 @@ namespace MVCAdoDemo.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int? id)
         {
-            var storedEmployee = _repo.GetEmployeeById(id.Value);
-            _repo.Delete(storedEmployee);
+            using (var session = _store.LightweightSession())
+            {
+                session.Delete<Employee>(id.Value);
+                session.SaveChanges();
+            }
+
             return RedirectToAction("Index");
         }
     }

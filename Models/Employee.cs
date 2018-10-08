@@ -15,7 +15,7 @@ namespace MVCAdoDemo.Models
         public string Gender { get; set; }  
         [Required]  
         public string Department { get; set; }  
-        [Required]  
-        public string City { get; set; }  
+        // [Required]  
+        // public string City { get; set; }  
     }  
 }
